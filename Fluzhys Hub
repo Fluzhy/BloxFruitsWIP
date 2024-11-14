@@ -6,17 +6,20 @@ if game.PlaceId == 2753915549 then
         SaveConfig = true, 
         ConfigFolder = "FluzhyConfig"
     })
-    
+
     local teleport_table = {
-        location1 = Vector3.new(1147, 20, 1261),
+        location1 = Vector3.new(1149, 20, 1260),
         location2 = Vector3.new(957, 16, 1338)
     }
-    
+
     local tween_s = game:GetService('TweenService')
     local tweeninfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
-    
+
     local lp = game.Players.LocalPlayer
-    
+
+    local current_tween = nil
+    local teleporting = false
+
     function bypass_teleport(v)
         if lp.Character and lp.Character:FindFirstChild('HumanoidRootPart') then 
             local cf = CFrame.new(v)
@@ -25,18 +28,16 @@ if game.PlaceId == 2753915549 then
             return a
         end
     end
-    
+
     local Tab = Window:MakeTab({
         Name = "Main",
         Icon = "rbxassetid://4483345998",
         PremiumOnly = false
     })
-    
+
     local Section = Tab:AddSection({
         Name = "Section"
     })
-
-    local teleporting = false
 
     Tab:AddToggle({
         Name = "Enable Teleporting",
@@ -44,12 +45,27 @@ if game.PlaceId == 2753915549 then
         Callback = function(Value)
             teleporting = Value
             if teleporting then
-                while teleporting do
-                    local tween1 = bypass_teleport(teleport_table.location1)
-                    tween1.Completed:Wait()  -- Wait for the teleport to complete
-                    local tween2 = bypass_teleport(teleport_table.location2)
-                    tween2.Completed:Wait()  -- Wait for the teleport to complete
-                    wait(0.5)  -- Optional delay between teleports
+                spawn(function()
+                    while teleporting do
+                        if current_tween then
+                            current_tween:Cancel()
+                        end
+                        
+                        current_tween = bypass_teleport(teleport_table.location1)
+                        current_tween.Completed:Wait()
+                        if not teleporting then break end
+                        
+                        current_tween = bypass_teleport(teleport_table.location2)
+                        current_tween.Completed:Wait()
+                        if not teleporting then break end
+                        
+                        wait(0.5)
+                    end
+                end)
+            else
+                teleporting = false
+                if current_tween then
+                    current_tween:Cancel()
                 end
             end
         end    
