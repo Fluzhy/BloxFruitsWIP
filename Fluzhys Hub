@@ -1,0 +1,59 @@
+if game.PlaceId == 2753915549 then
+    local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+    local Window = OrionLib:MakeWindow({
+        Name = "Fluzhys Hub", 
+        HidePremium = true, 
+        SaveConfig = true, 
+        ConfigFolder = "FluzhyConfig"
+    })
+    
+    local teleport_table = {
+        location1 = Vector3.new(1147, 20, 1261),
+        location2 = Vector3.new(957, 16, 1338)
+    }
+    
+    local tween_s = game:GetService('TweenService')
+    local tweeninfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
+    
+    local lp = game.Players.LocalPlayer
+    
+    function bypass_teleport(v)
+        if lp.Character and lp.Character:FindFirstChild('HumanoidRootPart') then 
+            local cf = CFrame.new(v)
+            local a = tween_s:Create(lp.Character.HumanoidRootPart, tweeninfo, {CFrame = cf})
+            a:Play()
+            return a
+        end
+    end
+    
+    local Tab = Window:MakeTab({
+        Name = "Main",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+    })
+    
+    local Section = Tab:AddSection({
+        Name = "Section"
+    })
+
+    local teleporting = false
+
+    Tab:AddToggle({
+        Name = "Enable Teleporting",
+        Default = false,
+        Callback = function(Value)
+            teleporting = Value
+            if teleporting then
+                while teleporting do
+                    local tween1 = bypass_teleport(teleport_table.location1)
+                    tween1.Completed:Wait()  -- Wait for the teleport to complete
+                    local tween2 = bypass_teleport(teleport_table.location2)
+                    tween2.Completed:Wait()  -- Wait for the teleport to complete
+                    wait(0.5)  -- Optional delay between teleports
+                end
+            end
+        end    
+    })
+
+    OrionLib:Init()
+end
